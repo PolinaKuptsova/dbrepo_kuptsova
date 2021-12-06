@@ -1,2 +1,3 @@
 Лабораторна робота №2
-Структура бази даних - https://drive.google.com/file/d/1VMEcIXEsrFUk47xkb1ECbHJCBrUivdn-/view?usp=sharing
+Структура бази даних - 
+(https://user-images.githubusercontent.com/71689791/144925147-40edc6c9-3d33-430b-9b35-23b1e4463023.png)
