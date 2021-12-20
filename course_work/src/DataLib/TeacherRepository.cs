@@ -1,23 +1,29 @@
 using System;
-using Microsoft.Data.Sqlite;
 using System.Collections.Generic;
+using MySql.Data.MySqlClient;
 
 public class TeacherRepository
 {
-    private SqliteConnection connection;
+    private MySqlConnection connection;
 
-    public TeacherRepository(SqliteConnection connection)
+    public TeacherRepository(MySqlConnection connection)
     {
         this.connection = connection;
-
+    }
+    public long GetCount()
+    {
+        MySqlCommand command = connection.CreateCommand();
+        command.CommandText = @"SELECT COUNT(*) FROM teachers";
+        long count = (long)command.ExecuteScalar();
+        return count;
     }
 
     public List<Teacher> GetAll()
     {
         List<Teacher> teachers = new List<Teacher>();
-        SqliteCommand command = this.connection.CreateCommand();
+        MySqlCommand command = this.connection.CreateCommand();
         command.CommandText = @"SELECT * FROM teachers";
-        SqliteDataReader reader = command.ExecuteReader();
+        MySqlDataReader reader = command.ExecuteReader();
         while (reader.Read())
         {
             teachers.Add(GetTeacher(reader));
@@ -28,19 +34,33 @@ public class TeacherRepository
 
     public Teacher GetByName(string name)
     {
-        throw new NotImplementedException();
+        Teacher teacher = new Teacher();
+        MySqlCommand command = this.connection.CreateCommand();
+        command.CommandText = @"SELECT * FROM teachers WHERE name = @name";
+        command.Parameters.AddWithValue("@name", name);
+        MySqlDataReader reader = command.ExecuteReader();
+        if (reader.Read())
+        {
+            teacher = GetTeacher(reader);
+        }
+        else
+        {
+            return null;
+        }
+        reader.Close();
+        return teacher;
     }
 
     public bool Update(long id, Teacher teacher)
     {
-        SqliteCommand command = this.connection.CreateCommand();
-        command.CommandText = @"UPDATE teachers SET name = $name, inAdministration = $inAdministration,
-            experience = $experience WHERE id = $id";
+        MySqlCommand command = this.connection.CreateCommand();
+        command.CommandText = @"UPDATE teachers SET name = @name, inAdministration = @inAdministration,
+            experience = @experience WHERE id = @id";
 
-        command.Parameters.AddWithValue("$id", id);
-        command.Parameters.AddWithValue("$name", teacher.Name);
-        command.Parameters.AddWithValue("$inAdministration", teacher.inAdministration);
-        command.Parameters.AddWithValue("$experience", teacher.experience);
+        command.Parameters.AddWithValue("@id", id);
+        command.Parameters.AddWithValue("@name", teacher.Name);
+        command.Parameters.AddWithValue("@inAdministration", teacher.inAdministration == true ? 1 : 0);
+        command.Parameters.AddWithValue("@experience", teacher.experience);
 
         int nChanged = command.ExecuteNonQuery();
         return nChanged == 1;
@@ -51,10 +71,10 @@ public class TeacherRepository
     public Teacher GetById(long id)
     {
         Teacher teacher = new Teacher();
-        SqliteCommand command = this.connection.CreateCommand();
-        command.CommandText = @"SELECT * FROM teachers WHERE id = $id";
-        command.Parameters.AddWithValue("$id", id);
-        SqliteDataReader reader = command.ExecuteReader();
+        MySqlCommand command = this.connection.CreateCommand();
+        command.CommandText = @"SELECT * FROM teachers WHERE id = @id";
+        command.Parameters.AddWithValue("@id", id);
+        MySqlDataReader reader = command.ExecuteReader();
         if (reader.Read())
         {
             teacher = GetTeacher(reader);
@@ -70,9 +90,9 @@ public class TeacherRepository
     public int DeleteById(long id)
     {
         Teacher teacher = new Teacher();
-        SqliteCommand command = this.connection.CreateCommand();
-        command.CommandText = @"DELETE FROM teachers WHERE id = $id";
-        command.Parameters.AddWithValue("$id", id);
+        MySqlCommand command = this.connection.CreateCommand();
+        command.CommandText = @"DELETE FROM teachers WHERE id = @id";
+        command.Parameters.AddWithValue("@id", id);
         int nChanged = command.ExecuteNonQuery();
         if (nChanged == 0)
         {
@@ -84,32 +104,22 @@ public class TeacherRepository
         }
     }
 
-    public int Insert(Teacher teacher)
+    public void Insert(Teacher teacher)
     {
-        SqliteCommand command = this.connection.CreateCommand();
+        MySqlCommand command = this.connection.CreateCommand();
         command.CommandText =
-        @"INSERT INTO customers (name, inAdministration, experience, startedWorking) 
-            VALUES ($name, $inAdministration, $experience, $startedWorking);
-            
-            SELECT last_insert_rowid();
-            ";
-        command.Parameters.AddWithValue("$name", teacher.Name);
-        command.Parameters.AddWithValue("$experience", teacher.experience);
-        command.Parameters.AddWithValue("$inAdministration", teacher.inAdministration); // ??
-        command.Parameters.AddWithValue("$registrationTime", teacher.startedWorking.ToString("o"));
-        long newId = (long)command.ExecuteScalar();
-        if (newId == 0)
-        {
-            return 0;
-        }
-        else
-        {
-            return (int)newId; ;
-        }
+        @"INSERT INTO teachers (name, inAdministration, experience, startedWorking) 
+            VALUES (@id, @name, @inAdministration, @experience, @startedWorking);
+            SELECT last_insert_id();";
+        command.Parameters.AddWithValue("@name", teacher.Name);
+        command.Parameters.AddWithValue("@experience", teacher.experience);
+        command.Parameters.AddWithValue("@inAdministration", teacher.inAdministration == true ? 1 : 0);
+        command.Parameters.AddWithValue("@startedWorking", teacher.startedWorking.ToString("o"));
+        command.ExecuteScalar();
 
     }
 
-    public Teacher GetTeacher(SqliteDataReader reader)
+    public Teacher GetTeacher(MySqlDataReader reader)
     {
         Teacher teacher = new Teacher(); 
         teacher.id = long.Parse(reader.GetString(0));

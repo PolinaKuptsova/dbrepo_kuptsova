@@ -20,6 +20,15 @@ public class Teacher
         this.startedWorking = startedWorking;
     }
 
+    public Teacher(long id, string name, bool inAdministration, int experience, DateTime startedWorking)
+    {
+        this.id = id;
+        this.inAdministration = inAdministration;
+        this.experience = experience;
+        this.startedWorking = startedWorking;
+        Name = name;
+    }
+
     public string Name
     {
         get
@@ -32,6 +41,7 @@ public class Teacher
             {
                 throw new ArgumentException("Name cannot be empty!");
             }
+            name = value;
         }
     }
 

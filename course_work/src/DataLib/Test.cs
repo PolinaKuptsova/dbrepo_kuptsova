@@ -20,6 +20,15 @@ public class Test
         this.studentId = studentId;
     }
 
+    public Test(long id, string subject, double point, DateTime date, long studentId)
+    {
+        this.id = id;
+        Subject = subject;
+        this.point = point;
+        this.date = date;
+        this.studentId = studentId;
+    }
+
     public string Subject 
     {
         get
@@ -32,6 +41,7 @@ public class Test
             {
                 throw new ArgumentException("Subject cannot be empty!");
             }
+            subject = value;
         }
     }
 

@@ -23,6 +23,16 @@ public class Student
     {
     }
 
+    public Student(long id, string name, int age, string classNumber, double averagePoint, long classTeacherId)
+    {
+        this.id = id;
+        this.age = age;
+        this.averagePoint = averagePoint;
+        this.classTeacherId = classTeacherId;
+        ClassNumber = classNumber;
+        Name = name;
+    }
+
     public string ClassNumber
     {
         get
@@ -35,6 +45,7 @@ public class Student
             {
                 throw new ArgumentException("ClassNumber cannot be empty!");
             }
+            classNumber = value;
         }
     }
     public string Name
@@ -49,6 +60,7 @@ public class Student
             {
                 throw new ArgumentException("Name of a student cannot be empty!");
             }
+            name = value;
         }
     }
 
